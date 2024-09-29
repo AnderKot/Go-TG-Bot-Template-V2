@@ -8,7 +8,7 @@ import (
 )
 
 type IRepository interface {
-	GetTemplateText(name string, langCode string) string
+	GetTemplateText(template ITemplate, langCode string) string
 	ExportTemplates()
 }
 
@@ -19,8 +19,8 @@ type User struct {
 }
 
 type Templates struct {
-	Name string `gorm:"primaryKey;" csv:"name"`
 	Code string `gorm:"primaryKey;" csv:"code"`
+	langCode string `gorm:"primaryKey;" csv:"lang_code"`
 	Text string `csv:"text"`
 }
 
@@ -45,7 +45,7 @@ func InitBase(dialector gorm.Dialector) IRepository {
 	//db.AutoMigrate(&Message{})
 
 	// template migration
-	file, err := os.Open(filepath.Join("Core", "templates.csv"))
+	file, err := os.Open(filepath.Join("", "templates.csv"))
 	if err == nil {
 		defer file.Close()
 		var templates []Templates
@@ -64,23 +64,27 @@ type Repository struct {
 	Database *gorm.DB
 }
 
-func (r *Repository) GetTemplateText(name string, code string) string {
-	templates := new(Templates)
-	templates.Name = name
-	templates.Code = code
-	r.Database.Where(&templates).Take(templates)
-	if templates.Text != "" {
+func (r *Repository) GetTemplateText(template ITemplate, langCode string) string {
+	if isTranslated() {
+		templates := new(Templates)
+		templates.Code = template.GetTemplateCode()
+		templates.langCode = langCode
+		r.Database.Where(&templates).Take(templates)
+		if templates.Text != "" {
+			return templates.Text
+		}
+		templates.langCode = "en"
+		r.Database.Where(&templates).Take(templates)
+		if templates.Text == "" {
+			templates.Text = "Template name not specificate"
+			r.Database.Save(templates)
+			templates.langCode = langCode
+			r.Database.Save(templates)
+		}
 		return templates.Text
+	}else{
+		return template.GetTemplateText()
 	}
-	templates.Code = "en"
-	r.Database.Where(&templates).Take(templates)
-	if templates.Text == "" {
-		templates.Text = "Template name not specificate"
-		r.Database.Save(templates)
-		templates.Code = code
-		r.Database.Save(templates)
-	}
-	return templates.Text
 }
 
 func (r *Repository) ExportTemplates() {

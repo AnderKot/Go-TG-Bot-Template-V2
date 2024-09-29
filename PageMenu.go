@@ -76,20 +76,20 @@ func (p *PageMenu) CreateKeyBoard() {
 }
 
 type PageTemplate struct {
-	text string
+	code string
 }
 
 func (pt PageTemplate) isTranslated() bool { return true }
 
 func (pt PageTemplate) GetTemplateText() string { return "" }
 
-func (pt PageTemplate) GetTemplateCode() string { return pt.text }
+func (pt PageTemplate) GetTemplateCode() string { return pt.code }
 
 type onBackToParentTemplate struct{}
 
 func (obpt onBackToParentTemplate) isTranslated() bool { return true }
 
-func (obpt onBackToParentTemplate) GetTemplateText() string { return "" }
+func (obpt onBackToParentTemplate) GetTemplateText() string { return "onBackToParent" }
 
 func (obpt onBackToParentTemplate) GetTemplateCode() string { return onBackToParent }
 
@@ -127,8 +127,8 @@ func (p *PageMenu) OnBackToParent() bool {
 }
 
 // Print
-func (p *PageMenu) GetMessageText() string {
-	return p.template.GetTemplateCode()
+func (p *PageMenu) GetMessageText() ITemplate {
+	return p.template
 }
 
 func (p *PageMenu) GetKeyboard() IKeyboard {

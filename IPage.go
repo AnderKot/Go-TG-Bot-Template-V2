@@ -13,6 +13,6 @@ type IPage interface {
 	OnBackToParent() bool
 
 	// Print
-	GetMessageText() string
+	GetMessageText() ITemplate
 	GetKeyboard() IKeyboard
 }
