@@ -8,6 +8,7 @@ import (
 )
 
 type IRepository interface {
+	GetUserByChatID(id int64) User
 	GetTemplateText(template ITemplate, langCode string) string
 	ExportTemplates()
 }
@@ -19,9 +20,9 @@ type User struct {
 }
 
 type Templates struct {
-	Code string `gorm:"primaryKey;" csv:"code"`
+	Code     string `gorm:"primaryKey;" csv:"code"`
 	langCode string `gorm:"primaryKey;" csv:"lang_code"`
-	Text string `csv:"text"`
+	Text     string `csv:"text"`
 }
 
 func InitBase(dialector gorm.Dialector) IRepository {
@@ -64,8 +65,15 @@ type Repository struct {
 	Database *gorm.DB
 }
 
+func (r *Repository) GetUserByChatID(id int64) User {
+	user := new(User)
+	user.ID = id
+	r.Database.Where(&user).Take(user)
+	return *user
+}
+
 func (r *Repository) GetTemplateText(template ITemplate, langCode string) string {
-	if isTranslated() {
+	if template.isTranslated() {
 		templates := new(Templates)
 		templates.Code = template.GetTemplateCode()
 		templates.langCode = langCode
@@ -82,7 +90,7 @@ func (r *Repository) GetTemplateText(template ITemplate, langCode string) string
 			r.Database.Save(templates)
 		}
 		return templates.Text
-	}else{
+	} else {
 		return template.GetTemplateText()
 	}
 }

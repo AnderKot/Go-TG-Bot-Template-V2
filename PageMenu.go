@@ -7,13 +7,55 @@ import (
 // Констукторы страниц менюшек
 func CreateMainMenu() *IPage {
 	constructor := PageMenuConstructor{
-		name:        "mainMenu",
-		template:    PageTemplate{text: "mainMenuPage"},
-		items:       make([]MenuItem, 0),
+		name:     "mainMenu",
+		template: &PageTemplate{code: "mainMenuPage"},
+		items: []MenuItem{
+			{
+				Name:        &MenuItemTemplate{code: "tournament"},
+				Constructor: &tournamentPageMenuConstructor,
+			}, {
+				Name:        &MenuItemTemplate{code: "yourActivity"},
+				Constructor: &PageMenuConstructor{},
+			}, {
+				Name:        &MenuItemTemplate{code: "profile"},
+				Constructor: &profilePageMenuConstructor,
+			},
+		},
 		isHasParent: false,
 	}
 	page := constructor.New()
 	return &(page)
+}
+
+var tournamentPageMenuConstructor = PageMenuConstructor{
+	name:     "tournamentMenu",
+	template: &PageTemplate{code: "tournamentMenuPage"},
+	items: []MenuItem{
+		{
+			Name:        &MenuItemTemplate{code: "create"},
+			Constructor: &PageMenuConstructor{},
+		}, {
+			Name:        &MenuItemTemplate{code: "yours"},
+			Constructor: &PageMenuConstructor{},
+		}, {
+			Name:        &MenuItemTemplate{code: "matchmaking"},
+			Constructor: &PageMenuConstructor{},
+		}, {
+			Name:        &MenuItemTemplate{code: "running"},
+			Constructor: &PageMenuConstructor{},
+		}, {
+			Name:        &MenuItemTemplate{code: "ended"},
+			Constructor: &PageMenuConstructor{},
+		},
+	},
+	isHasParent: true,
+}
+
+var profilePageMenuConstructor = PageMenuConstructor{
+	name:        "profileMenu",
+	template:    &PageTemplate{code: "profileMenuPage"},
+	items:       []MenuItem{},
+	isHasParent: true,
 }
 
 // Реализация страниц меню
@@ -68,7 +110,7 @@ func (p *PageMenu) CreateKeyBoard() {
 
 	if p.isHasParent {
 		kb.Rows = append(kb.Rows, &KeyRow{Keys: []IKey{
-			Key{Name: onBackToParentTemplate{}, Data: onBackToParent},
+			Key{Name: &onBackToParentTemplate{}, Data: onBackToParent},
 		}})
 	}
 
@@ -79,19 +121,29 @@ type PageTemplate struct {
 	code string
 }
 
-func (pt PageTemplate) isTranslated() bool { return true }
+func (pt *PageTemplate) isTranslated() bool { return true }
 
-func (pt PageTemplate) GetTemplateText() string { return "" }
+func (pt *PageTemplate) GetTemplateText() string { return "" }
 
-func (pt PageTemplate) GetTemplateCode() string { return pt.code }
+func (pt *PageTemplate) GetTemplateCode() string { return pt.code }
+
+type MenuItemTemplate struct {
+	code string
+}
+
+func (pt *MenuItemTemplate) isTranslated() bool { return true }
+
+func (pt *MenuItemTemplate) GetTemplateText() string { return "" }
+
+func (pt *MenuItemTemplate) GetTemplateCode() string { return pt.code }
 
 type onBackToParentTemplate struct{}
 
-func (obpt onBackToParentTemplate) isTranslated() bool { return true }
+func (obpt *onBackToParentTemplate) isTranslated() bool { return true }
 
-func (obpt onBackToParentTemplate) GetTemplateText() string { return "onBackToParent" }
+func (obpt *onBackToParentTemplate) GetTemplateText() string { return "onBackToParent" }
 
-func (obpt onBackToParentTemplate) GetTemplateCode() string { return onBackToParent }
+func (obpt *onBackToParentTemplate) GetTemplateCode() string { return onBackToParent }
 
 // IPage >>
 // Common

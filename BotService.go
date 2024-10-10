@@ -12,7 +12,7 @@ func NewBotService(botAPI *tgBotAPI.BotAPI, database IRepository) BotService {
 		UserMutexes:      map[int64]*sync.Mutex{},
 		UserPagesQueue:   map[int64]Queue.MyQueue[IPage]{},
 		UserChatMessages: map[int64]Message{},
-		Repository:       repository,
+		Repository:       database,
 	}
 }
 
@@ -77,8 +77,8 @@ func (bs *BotService) Start() {
 			}
 
 			// Ответ пользователю
-			newText := bs.Repository.GetTemplateText((*page).GetMessageText(), langCode) 
-		
+			newText := bs.Repository.GetTemplateText((*page).GetMessageText(), langCode)
+
 			newKeyboard := (*page).GetKeyboard()
 
 			oldMessage, isOldExist := bs.UserChatMessages[chatID]
@@ -106,6 +106,10 @@ func (bs *BotService) Start() {
 			SaveUnlock(bs.UserMutexes[chatID])
 		}(bs.BotAPI, u)
 	}
+}
+
+func (bs *BotService) final() {
+
 }
 
 func (bs *BotService) sendNew(chat int64, text string, keyboard *tgBotAPI.InlineKeyboardMarkup, isMarkdown bool) (bool, int) {
@@ -156,7 +160,7 @@ func (bs *BotService) GenerateKeyboard(kbd IKeyboard, langCode string) *tgBotAPI
 	for _, row := range kbd.GetRows() {
 		var botRow []tgBotAPI.InlineKeyboardButton
 		for _, key := range row.GetKeys() {
-			botRow = append(botRow, bs.Repository.GetTemplateText(nawTextTemplate, langCode) , key.GetData()))
+			botRow = append(botRow, tgBotAPI.NewInlineKeyboardButtonData(bs.Repository.GetTemplateText(key.GetTemplate(), langCode), key.GetData()))
 		}
 		if len(botRow) > 0 {
 			botKeyboard.InlineKeyboard = append(botKeyboard.InlineKeyboard, botRow)

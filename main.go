@@ -27,6 +27,7 @@ func main() {
 
 	bot := NewBotService(botAPI, database)
 
+	defer bot.final()
 	go bot.Start()
 }
 

@@ -93,7 +93,7 @@ func (l *List) CreateKeyBoardAndMessage() {
 	}
 
 	kb.Rows = append(kb.Rows, &KeyRow{Keys: []IKey{
-		Key{Name: onBackToParentTemplate{}, Data: onBackToParent},
+		Key{Name: &onBackToParentTemplate{}, Data: onBackToParent},
 	}})
 
 	l.board = &kb
@@ -171,8 +171,8 @@ func (l *List) OnBackToParent() bool {
 }
 
 // Print
-func (l *List) GetMessageText() string {
-	return l.messageBuilder.String()
+func (l *List) GetMessageText() ITemplate {
+	return &ListTemplate{text: l.messageBuilder.String()}
 }
 
 func (l *List) GetKeyboard() IKeyboard {
@@ -180,3 +180,13 @@ func (l *List) GetKeyboard() IKeyboard {
 }
 
 // IPage <<
+
+type ListTemplate struct {
+	text string
+}
+
+func (obpt *ListTemplate) isTranslated() bool { return false }
+
+func (obpt *ListTemplate) GetTemplateText() string { return obpt.text }
+
+func (obpt *ListTemplate) GetTemplateCode() string { return "" }
